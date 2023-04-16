@@ -3,7 +3,7 @@ from models.TodoModel import TodoModel
 from schemas import CreateTodoSchema, UpdateTodoSchema
 from sqlalchemy.orm import Session
 from exceptions.TodoNotFoundException import TodoNotFoundException
-from utils.get_db import get_db
+from utils.database import get_db
 
 router = APIRouter(
     prefix="/todos",
