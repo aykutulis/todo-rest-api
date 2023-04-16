@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from models.TodoModel import TodoModel
+from schemas.TodoSchema import TodoSchema
 from database import Base
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -32,3 +33,13 @@ def get_todo(id: int, db: Session = Depends(get_db)):
         raise TodoNotFoundException()
 
     return todo
+
+
+@app.post("/todos")
+def create_todo(todo: TodoSchema, db: Session = Depends(get_db)):
+    new_todo = TodoModel(title=todo.title, description=todo.description,
+                         priority=todo.priority, complete=todo.complete)
+    db.add(new_todo)
+    db.commit()
+    db.refresh(new_todo)
+    return new_todo
