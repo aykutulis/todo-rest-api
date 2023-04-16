@@ -60,3 +60,16 @@ def update_todo(id: int, todo: UpdateTodoSchema, db: Session = Depends(get_db)):
     db.refresh(existing_todo)
 
     return existing_todo
+
+
+@app.delete("/todos/{id}")
+def delete_todo(id: int, db: Session = Depends(get_db)):
+    todo = db.query(TodoModel).filter(TodoModel.id == id).first()
+
+    if not todo:
+        raise TodoNotFoundException()
+
+    db.delete(todo)
+    db.commit()
+
+    return {"message": "Todo deleted successfully"}
