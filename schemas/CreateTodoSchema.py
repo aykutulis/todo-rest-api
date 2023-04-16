@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 
-class TodoSchema(BaseModel):
+class CreateTodoSchema(BaseModel):
     title: str
     description: Optional[str] = Field(title="Description", max_length=300)
     priority: int = Field(
