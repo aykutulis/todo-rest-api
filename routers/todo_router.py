@@ -8,7 +8,6 @@ from utils.database import get_db
 router = APIRouter(
     prefix="/todos",
     tags=["todos"],
-    redirect_slashes=True,
 )
 
 
