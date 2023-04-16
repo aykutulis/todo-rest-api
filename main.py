@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from exceptions.TodoNotFoundException import TodoNotFoundException
 
 app = FastAPI()
 
@@ -26,6 +27,6 @@ def get_todo(id: int, db: Session = Depends(get_db)):
     todo = db.query(models.Todo).filter(models.Todo.id == id).first()
 
     if not todo:
-        raise HTTPException(status_code=404, detail="Todo not found")
+        raise TodoNotFoundException()
 
     return todo
