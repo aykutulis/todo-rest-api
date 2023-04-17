@@ -1,14 +1,13 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from exceptions.CredentialsException import CredentialsException
 
 
-from schemas import CreateUserSchema
-from utils.database_utils import get_db
-from utils.auth_utils import authenticate_user, create_access_token, get_current_user
+from schemas import CreateUserSchema, TokenResponseSchema
+from utils.database_utils import db_dependency
+from utils.auth_utils import authenticate_user, create_access_token, current_user_dependency
 from models import UserModel
 
 
@@ -19,16 +18,17 @@ router = APIRouter(
 
 
 @router.post("/create")
-def create_user(user: CreateUserSchema, db: Session = Depends(get_db)):
+def create_user(user: CreateUserSchema, db: db_dependency):
     new_user = UserModel(**user.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    delattr(new_user, 'password')
     return new_user
 
 
-@router.post("/token")
-def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+@router.post("/token", response_model=TokenResponseSchema)
+def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise CredentialsException()
@@ -41,6 +41,6 @@ def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: S
 
 @router.get("/me")
 def read_users_me(
-    current_user: Annotated[UserModel, Depends(get_current_user)]
+    current_user: current_user_dependency
 ):
     return current_user

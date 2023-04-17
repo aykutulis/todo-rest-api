@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from models.TodoModel import TodoModel
 from schemas import CreateTodoSchema, UpdateTodoSchema
-from sqlalchemy.orm import Session
 from exceptions.TodoNotFoundException import TodoNotFoundException
-from utils.database_utils import get_db
+from utils.database_utils import db_dependency
 
 router = APIRouter(
     prefix="/todos",
@@ -12,12 +11,12 @@ router = APIRouter(
 
 
 @router.get("")
-def get_all_todos(db: Session = Depends(get_db)):
+def get_all_todos(db: db_dependency):
     return db.query(TodoModel).all()
 
 
 @router.get("/{id}")
-def get_todo(id: int, db: Session = Depends(get_db)):
+def get_todo(id: int, db: db_dependency):
     todo = db.query(TodoModel).filter(TodoModel.id == id).first()
 
     if not todo:
@@ -27,7 +26,7 @@ def get_todo(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("")
-def create_todo(todo: CreateTodoSchema, db: Session = Depends(get_db)):
+def create_todo(todo: CreateTodoSchema, db: db_dependency):
     new_todo = TodoModel(**todo.dict())
     db.add(new_todo)
     db.commit()
@@ -36,7 +35,7 @@ def create_todo(todo: CreateTodoSchema, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}")
-def update_todo(id: int, todo: UpdateTodoSchema, db: Session = Depends(get_db)):
+def update_todo(id: int, todo: UpdateTodoSchema, db: db_dependency):
     existing_todo = db.query(TodoModel).filter(TodoModel.id == id).first()
 
     if not existing_todo:
@@ -54,7 +53,7 @@ def update_todo(id: int, todo: UpdateTodoSchema, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}")
-def delete_todo(id: int, db: Session = Depends(get_db)):
+def delete_todo(id: int, db: db_dependency):
     todo = db.query(TodoModel).filter(TodoModel.id == id).first()
 
     if not todo:

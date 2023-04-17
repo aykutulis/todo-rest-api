@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class TokenDataSchema(BaseModel):
+class TokenPayloadSchema(BaseModel):
     id: int
     email: str
     username: str
