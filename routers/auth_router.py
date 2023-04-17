@@ -1,13 +1,14 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+from exceptions.CredentialsException import CredentialsException
 
 
 from schemas import CreateUserSchema
 from utils.database_utils import get_db
-from utils.auth_utils import authenticate_user, create_access_token
+from utils.auth_utils import authenticate_user, create_access_token, get_current_user
 from models import UserModel
 
 
@@ -30,13 +31,16 @@ def create_user(user: CreateUserSchema, db: Session = Depends(get_db)):
 def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise CredentialsException()
 
     access_token_expires = timedelta(minutes=20)
     access_token = create_access_token(user, access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me")
+def read_users_me(
+    current_user: Annotated[UserModel, Depends(get_current_user)]
+):
+    return current_user
