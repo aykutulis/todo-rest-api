@@ -13,8 +13,8 @@ router = APIRouter(
 
 
 @router.get("")
-def get_all_todos(db: db_dependency):
-    return db.query(TodoModel).all()
+def get_user_todos(user: current_user_dependency, db: db_dependency):
+    return db.query(TodoModel).filter(TodoModel.owner_id == user['id']).all()
 
 
 @router.get("/{id}")
