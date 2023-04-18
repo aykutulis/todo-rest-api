@@ -14,12 +14,23 @@ router = APIRouter(
 
 @router.get("")
 def get_user_todos(user: current_user_dependency, db: db_dependency):
+
+    if user is None:
+        raise AuthenticationException()
+
     return db.query(TodoModel).filter(TodoModel.owner_id == user['id']).all()
 
 
 @router.get("/{id}")
-def get_todo(id: int, db: db_dependency):
-    todo = db.query(TodoModel).filter(TodoModel.id == id).first()
+def get_todo(id: int, user: current_user_dependency, db: db_dependency):
+
+    if user is None:
+        raise AuthenticationException()
+
+    todo = db.query(TodoModel).filter(
+        TodoModel.id == id,
+        TodoModel.owner_id == user['id']
+    ).first()
 
     if not todo:
         raise TodoNotFoundException()
