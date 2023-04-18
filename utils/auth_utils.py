@@ -52,9 +52,14 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: db
         raise CredentialsException()
 
     user = db.query(UserModel).filter(UserModel.id == token_data.id).first()
-    delattr(user, 'password')
+
     if user is None:
         raise CredentialsException()
+
+    user = user.__dict__
+
+    del user['password']
+
     return user
 
-current_user_dependency = Annotated[UserModel, Depends(get_current_user)]
+current_user_dependency = Annotated[dict, Depends(get_current_user)]

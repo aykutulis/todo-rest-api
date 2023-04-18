@@ -2,7 +2,9 @@ from fastapi import APIRouter
 from models.TodoModel import TodoModel
 from schemas import CreateTodoSchema, UpdateTodoSchema
 from exceptions.TodoNotFoundException import TodoNotFoundException
+from exceptions.AuthenticationException import AuthenticationException
 from utils.database_utils import db_dependency
+from utils.auth_utils import current_user_dependency
 
 router = APIRouter(
     prefix="/todos",
@@ -26,8 +28,11 @@ def get_todo(id: int, db: db_dependency):
 
 
 @router.post("")
-def create_todo(todo: CreateTodoSchema, db: db_dependency):
-    new_todo = TodoModel(**todo.dict())
+def create_todo(user: current_user_dependency, todo: CreateTodoSchema, db: db_dependency):
+    if not user:
+        raise AuthenticationException()
+
+    new_todo = TodoModel(**todo.dict(), owner_id=user['id'])
     db.add(new_todo)
     db.commit()
     db.refresh(new_todo)
