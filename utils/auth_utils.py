@@ -4,14 +4,16 @@ from fastapi import Depends
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from config.Settings import settings
 from exceptions.CredentialsException import CredentialsException
 
 from models import UserModel
 from schemas import TokenPayloadSchema
 from utils.database_utils import db_dependency
 
-JWT_SECRET = "secret"
-JWT_ALGORITHM = "HS256"
+JWT_SECRET = settings.JWT_SECRET
+JWT_ALGORITHM = settings.JWT_ALGORITHM
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 

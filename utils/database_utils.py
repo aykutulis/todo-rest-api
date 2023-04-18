@@ -4,7 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URI = 'sqlite:///db.sqlite3'
+from config.Settings import settings
+
+DATABASE_URI = settings.DATABASE_URI
 
 engine = create_engine(DATABASE_URI, connect_args={'check_same_thread': False})
 
