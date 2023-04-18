@@ -51,8 +51,14 @@ def create_todo(user: current_user_dependency, todo: CreateTodoSchema, db: db_de
 
 
 @router.put("/{id}")
-def update_todo(id: int, todo: UpdateTodoSchema, db: db_dependency):
-    existing_todo = db.query(TodoModel).filter(TodoModel.id == id).first()
+def update_todo(id: int, user: current_user_dependency, todo: UpdateTodoSchema, db: db_dependency):
+
+    if not user:
+        raise AuthenticationException()
+
+    existing_todo = db.query(TodoModel).filter(
+        TodoModel.id == id, TodoModel.owner_id == user['id']
+    ).first()
 
     if not existing_todo:
         raise TodoNotFoundException()
@@ -69,8 +75,14 @@ def update_todo(id: int, todo: UpdateTodoSchema, db: db_dependency):
 
 
 @router.delete("/{id}")
-def delete_todo(id: int, db: db_dependency):
-    todo = db.query(TodoModel).filter(TodoModel.id == id).first()
+def delete_todo(id: int, user: current_user_dependency, db: db_dependency):
+    if not user:
+        raise AuthenticationException()
+
+    todo = db.query(TodoModel).filter(
+        TodoModel.id == id,
+        TodoModel.owner_id == user['id']
+    ).first()
 
     if not todo:
         raise TodoNotFoundException()
